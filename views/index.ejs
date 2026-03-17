@@ -1,130 +1,467 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>DIBSL Vendor Dashboard</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DIBSL | Vendor Authority</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+            colors: {
+              brand: {
+                50: "#f0f9ff",
+                100: "#e0f2fe",
+                500: "#0ea5e9",
+                600: "#0284c7",
+                900: "#0c4a6e",
+              },
+            },
+            boxShadow: {
+              glass:
+                "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
+            },
+          },
+        },
+      };
+    </script>
     <style>
-      body {
-        background-color: #f8f9fa;
+      .terminal-scroll::-webkit-scrollbar {
+        width: 6px;
       }
-      .card {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      .terminal-scroll::-webkit-scrollbar-track {
+        background: transparent;
       }
-      .status-box {
-        font-family: monospace;
-        background: #222;
-        color: #0f0;
-        padding: 10px;
-        border-radius: 5px;
+      .terminal-scroll::-webkit-scrollbar-thumb {
+        background: #374151;
+        border-radius: 3px;
+      }
+      /* Smooth transitions for inputs */
+      input,
+      select,
+      button {
+        transition: all 0.2s ease-in-out;
       }
     </style>
   </head>
-  <body class="container py-5">
-    <div class="row mb-4">
-      <div class="col">
-        <h1>🛡️ DIBSL Vendor Authority</h1>
-        <p class="text-muted">
-          Decentralized Identity-Bound Software Licensing
-        </p>
+  <body
+    class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col relative z-0"
+  >
+    <div
+      class="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-brand-100/50 via-brand-50/20 to-transparent -z-10 pointer-events-none"
+    ></div>
+
+    <nav
+      class="sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-4 flex justify-between items-center shadow-sm z-50"
+    >
+      <div class="flex items-center gap-4">
+        <div
+          class="bg-gradient-to-br from-brand-500 to-brand-600 text-white p-2.5 rounded-xl shadow-lg shadow-brand-500/30"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            ></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-slate-900 tracking-tight">
+            DIBSL Authority
+          </h1>
+          <p
+            class="text-xs text-brand-600 font-semibold uppercase tracking-wider mt-0.5"
+          >
+            Vendor Command Center
+          </p>
+        </div>
       </div>
-      <div class="col-auto">
-        <button id="connectBtn" class="btn btn-warning">
-          Connect MetaMask
+      <div class="flex items-center gap-4">
+        <div
+          class="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-lg border border-slate-200"
+        >
+          <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+          <span class="text-xs font-mono text-slate-600">Mainnet Synced</span>
+        </div>
+        <button
+          id="connectBtn"
+          class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-slate-900/20 flex items-center gap-2"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+            ></path>
+          </svg>
+          Connect Wallet
         </button>
       </div>
-    </div>
+    </nav>
 
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5>System Status</h5>
-        <p>
-          <strong>Contract Address:</strong>
-          <span id="contractAddr"><%= contractAddress %></span>
-        </p>
-        <p>
-          <strong>Your Admin Address:</strong>
-          <span id="adminAddr">Not Connected</span>
-        </p>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-6">
-        <div class="card h-100">
-          <div class="card-header bg-primary text-white">
-            Issue New License (Mint SBT)
+    <main class="flex-grow p-8 max-w-7xl mx-auto w-full">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div
+          class="bg-white p-6 rounded-2xl border border-slate-200 shadow-glass"
+        >
+          <p class="text-sm text-slate-500 font-medium mb-1">Smart Contract</p>
+          <p
+            class="text-sm font-mono text-slate-900 truncate"
+            id="contractAddr"
+            title="<%= contractAddress %>"
+          >
+            <%= contractAddress %>
+          </p>
+        </div>
+        <div
+          class="bg-white p-6 rounded-2xl border border-slate-200 shadow-glass"
+        >
+          <p class="text-sm text-slate-500 font-medium mb-1">Admin Node</p>
+          <p class="text-sm font-mono text-slate-400 truncate" id="adminAddr">
+            Awaiting Connection...
+          </p>
+        </div>
+        <div
+          class="bg-white p-6 rounded-2xl border border-slate-200 shadow-glass"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-sm text-slate-500 font-medium mb-1">Active SBTs</p>
+              <p class="text-2xl font-bold text-slate-900">1,204</p>
+            </div>
+            <span
+              class="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full"
+              >+12%</span
+            >
           </div>
-          <div class="card-body">
-            <form id="mintForm">
-              <div class="mb-3">
-                <label>Customer Wallet Address</label>
-                <input
-                  type="text"
-                  id="recipient"
-                  class="form-control"
-                  placeholder="0x..."
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label>Product ID</label>
-                <input
-                  type="number"
-                  id="productId"
-                  class="form-control"
-                  value="101"
-                  required
-                />
-              </div>
-              <div class="mb-3">
-                <label>License Tier (0=Basic, 1=Pro, 2=Ent)</label>
-                <select id="tier" class="form-select">
-                  <option value="0">Basic</option>
-                  <option value="1">Pro (Recommended)</option>
-                  <option value="2">Enterprise</option>
-                </select>
-              </div>
-              <div class="mb-3">
-                <label>Duration (Days)</label>
-                <input
-                  type="number"
-                  id="days"
-                  class="form-control"
-                  value="365"
-                />
-              </div>
-              <button type="submit" class="btn btn-success w-100">
-                Mint License SBT
-              </button>
-            </form>
+        </div>
+        <div
+          class="bg-white p-6 rounded-2xl border border-slate-200 shadow-glass"
+        >
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-sm text-slate-500 font-medium mb-1">Revocations</p>
+              <p class="text-2xl font-bold text-slate-900">3</p>
+            </div>
+            <span
+              class="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full"
+              >This Week</span
+            >
           </div>
         </div>
       </div>
 
-      <div class="col-md-6">
-        <div class="card h-100">
-          <div class="card-header bg-dark text-white">Transaction Logs</div>
-          <div class="card-body">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-5 flex flex-col gap-6">
+          <div
+            class="bg-white rounded-2xl border border-slate-200 shadow-glass overflow-hidden"
+          >
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+              <h2 class="text-lg font-bold text-slate-800">
+                Issue New License
+              </h2>
+              <p class="text-sm text-slate-500 mt-1">
+                Deploy a polymorphic SBT to a client wallet.
+              </p>
+            </div>
+            <div class="p-6">
+              <form id="mintForm" class="space-y-5">
+                <div>
+                  <label
+                    class="block text-sm font-semibold text-slate-700 mb-1.5"
+                    >Customer Wallet Address</label
+                  >
+                  <input
+                    type="text"
+                    id="recipient"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white outline-none font-mono text-sm shadow-sm"
+                    placeholder="0x..."
+                    required
+                  />
+                </div>
+
+                <div class="grid grid-cols-2 gap-5">
+                  <div>
+                    <label
+                      class="block text-sm font-semibold text-slate-700 mb-1.5"
+                      >Product ID</label
+                    >
+                    <input
+                      type="number"
+                      id="productId"
+                      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white outline-none shadow-sm"
+                      value="101"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-sm font-semibold text-slate-700 mb-1.5"
+                      >Duration (Days)</label
+                    >
+                    <input
+                      type="number"
+                      id="days"
+                      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white outline-none shadow-sm"
+                      value="365"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    class="block text-sm font-semibold text-slate-700 mb-1.5"
+                    >Security Tier</label
+                  >
+                  <div class="relative">
+                    <select
+                      id="tier"
+                      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:bg-white outline-none appearance-none cursor-pointer shadow-sm"
+                    >
+                      <option value="0">Tier 0: Basic Authentication</option>
+                      <option value="1" selected>
+                        Tier 1: Pro (Cryptographic Proof)
+                      </option>
+                      <option value="2">
+                        Tier 2: Enterprise (Polymorphic MTD)
+                      </option>
+                    </select>
+                    <div
+                      class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500"
+                    >
+                      <svg
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-brand-500/30 mt-4 flex justify-center items-center gap-2 group"
+                >
+                  <svg
+                    class="w-5 h-5 group-hover:rotate-12 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    ></path>
+                  </svg>
+                  Mint License SBT
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 flex flex-col gap-6">
+          <div
+            class="bg-[#0f111a] rounded-2xl border border-slate-800 shadow-2xl overflow-hidden flex flex-col h-[320px]"
+          >
+            <div
+              class="bg-[#1a1d27] border-b border-slate-800/50 px-4 py-3 flex items-center justify-between"
+            >
+              <div class="flex items-center gap-3">
+                <div class="flex gap-1.5">
+                  <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                  <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <span class="text-xs font-mono text-slate-400"
+                  >blockchain-daemon // stdout</span
+                >
+              </div>
+              <span
+                class="text-[10px] font-mono text-brand-500 px-2 py-0.5 rounded bg-brand-500/10 border border-brand-500/20"
+                >LIVE</span
+              >
+            </div>
             <div
               id="logs"
-              class="status-box"
-              style="height: 300px; overflow-y: auto"
+              class="p-5 font-mono text-sm text-green-400 flex-grow overflow-y-auto terminal-scroll space-y-1.5"
             >
-              <div>> Ready to issue licenses...</div>
+              <div class="text-slate-500">
+                Initializing DIBSL Cryptographic Protocol...
+              </div>
+              <div class="text-slate-500">
+                Connection to Web3 provider established.
+              </div>
+              <div class="text-brand-400">
+                > Ready to issue identity-bound licenses. Waiting for input...
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="bg-white rounded-2xl border border-slate-200 shadow-glass overflow-hidden flex-1"
+          >
+            <div
+              class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50"
+            >
+              <h3 class="text-sm font-bold text-slate-800">Recent Issuances</h3>
+              <button
+                class="text-xs font-semibold text-brand-600 hover:text-brand-700"
+              >
+                View All
+              </button>
+            </div>
+            <div class="p-0 overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead
+                  class="text-xs text-slate-500 uppercase bg-white border-b border-slate-100"
+                >
+                  <tr>
+                    <th class="px-6 py-3 font-semibold">Token ID</th>
+                    <th class="px-6 py-3 font-semibold">Recipient</th>
+                    <th class="px-6 py-3 font-semibold">Tier</th>
+                    <th class="px-6 py-3 font-semibold text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-slate-600">
+                  <tr>
+                    <td class="px-6 py-3 font-mono font-medium text-slate-900">
+                      #1204
+                    </td>
+                    <td class="px-6 py-3 font-mono text-xs">0x71C...976F</td>
+                    <td class="px-6 py-3">
+                      <span
+                        class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-md font-medium"
+                        >Enterprise</span
+                      >
+                    </td>
+                    <td class="px-6 py-3 text-right">
+                      <span
+                        class="flex items-center justify-end gap-1.5 text-green-600 font-medium"
+                        ><div
+                          class="w-1.5 h-1.5 rounded-full bg-green-500"
+                        ></div>
+                        Active</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-6 py-3 font-mono font-medium text-slate-900">
+                      #1203
+                    </td>
+                    <td class="px-6 py-3 font-mono text-xs">0x3A2...11B4</td>
+                    <td class="px-6 py-3">
+                      <span
+                        class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-md font-medium"
+                        >Pro</span
+                      >
+                    </td>
+                    <td class="px-6 py-3 text-right">
+                      <span
+                        class="flex items-center justify-end gap-1.5 text-green-600 font-medium"
+                        ><div
+                          class="w-1.5 h-1.5 rounded-full bg-green-500"
+                        ></div>
+                        Active</span
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-6 py-3 font-mono font-medium text-slate-900">
+                      #1202
+                    </td>
+                    <td class="px-6 py-3 font-mono text-xs">0x99F...4C2A</td>
+                    <td class="px-6 py-3">
+                      <span
+                        class="px-2 py-1 bg-slate-100 text-slate-700 text-xs rounded-md font-medium"
+                        >Basic</span
+                      >
+                    </td>
+                    <td class="px-6 py-3 text-right">
+                      <span
+                        class="flex items-center justify-end gap-1.5 text-slate-400 font-medium"
+                        >Expired</span
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="text-center mt-5">
-      <a href="/app" class="btn btn-outline-secondary"
-        >➡️ Switch to User Client View</a
-      >
-    </div>
+      <div class="mt-12 flex justify-center pb-8">
+        <a
+          href="/app"
+          class="group inline-flex items-center gap-3 px-8 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 hover:border-brand-300 hover:text-brand-600 transition-all shadow-glass font-semibold"
+        >
+          <div
+            class="p-2 bg-slate-100 rounded-lg group-hover:bg-brand-100 group-hover:text-brand-600 transition-colors"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+              ></path>
+            </svg>
+          </div>
+          Switch to User Verification Client (app.ejs)
+          <svg
+            class="w-5 h-5 text-slate-400 group-hover:text-brand-600 group-hover:translate-x-1 transition-all"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M14 5l7 7m0 0l-7 7m7-7H3"
+            ></path>
+          </svg>
+        </a>
+      </div>
+    </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="/js/vendor.js"></script>

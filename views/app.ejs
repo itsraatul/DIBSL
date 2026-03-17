@@ -1,106 +1,404 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>DIBSL Runtime Environment</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DIBSL | Secure Client Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
     />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+            colors: {
+              brand: { 500: "#10b981", 600: "#059669" }, // Emerald theme for success
+              dark: { 800: "#1e293b", 900: "#0f172a", 950: "#020617" },
+            },
+          },
+        },
+      };
+    </script>
     <style>
-      body {
-        background-color: #121212;
-        color: #e0e0e0;
-        font-family: "Segoe UI", monospace;
+      /* Smooth transitions for the unlock effect */
+      #softwareContent {
+        filter: blur(12px) grayscale(50%);
+        transition: filter 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s ease;
       }
-      .terminal {
-        background: #000;
-        border: 1px solid #333;
-        padding: 20px;
-        height: 400px;
-        overflow-y: auto;
-        font-family: "Courier New", courier;
+      #softwareContent.unlocked {
+        filter: blur(0) grayscale(0%);
+        pointer-events: auto !important;
+        user-select: auto !important;
       }
-      .log-info {
-        color: #888;
+
+      #lockOverlay {
+        transition: opacity 0.8s ease, backdrop-filter 0.8s ease;
       }
-      .log-success {
-        color: #0f0;
+      #lockOverlay.hidden-overlay {
+        opacity: 0;
+        backdrop-filter: blur(0);
+        pointer-events: none;
       }
-      .log-error {
-        color: #f00;
+
+      /* Custom scrollbars */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
       }
-      .log-warn {
-        color: #ffc107;
+      ::-webkit-scrollbar-track {
+        background: transparent;
       }
-      .secret-content {
-        filter: blur(5px);
-        transition: filter 0.5s;
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 3px;
       }
-      .unlocked {
-        filter: blur(0);
-        border: 2px solid #0f0;
+      ::-webkit-scrollbar-thumb:hover {
+        background: #475569;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      #lockOverlay {
+        animation: fadeIn 0.6s ease;
       }
     </style>
   </head>
-  <body class="container py-5">
-    <div class="row">
-      <div class="col-md-4">
-        <h3>🔒 DIBSL Runtime</h3>
-        <p class="small text-muted">Client-Side Ephemeral Vault</p>
+  <body
+    class="bg-dark-900 text-slate-200 font-sans h-screen flex overflow-hidden selection:bg-brand-500 selection:text-white"
+  >
+    <aside
+      class="w-16 lg:w-64 bg-dark-950 border-r border-slate-800 flex flex-col justify-between shrink-0 z-30 relative"
+    >
+      <div>
+        <div
+          class="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-slate-800"
+        >
+          <svg
+            class="w-8 h-8 text-brand-500 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            ></path>
+          </svg>
+          <span
+            class="hidden lg:block ml-3 font-bold text-lg tracking-wide text-white"
+            >DIBSL<span class="text-brand-500 text-xs align-top"
+              >PRO</span
+            ></span
+          >
+        </div>
+        <nav class="p-4 space-y-2">
+          <a
+            href="#"
+            class="flex items-center gap-3 px-3 py-2.5 bg-dark-800 text-white rounded-lg"
+          >
+            <svg
+              class="w-5 h-5 opacity-75"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+              ></path>
+            </svg>
+            <span class="hidden lg:block text-sm font-medium">Overview</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-dark-800/50 rounded-lg transition-colors"
+          >
+            <svg
+              class="w-5 h-5 opacity-75"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              ></path>
+            </svg>
+            <span class="hidden lg:block text-sm font-medium">Analytics</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-dark-800/50 rounded-lg transition-colors"
+          >
+            <svg
+              class="w-5 h-5 opacity-75"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              ></path>
+            </svg>
+            <span class="hidden lg:block text-sm font-medium"
+              >Security Policies</span
+            >
+          </a>
+        </nav>
+      </div>
 
-        <div class="card bg-dark text-light mb-3">
-          <div class="card-body">
-            <label>Wallet Identity</label>
-            <div id="userAddress" class="text-info mb-3">Not Connected</div>
+      <div class="p-4 border-t border-slate-800">
+        <div
+          class="hidden lg:block mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+        >
+          Active Wallet
+        </div>
+        <div
+          id="userAddress"
+          class="text-xs font-mono text-cyan-400 truncate bg-slate-900 p-2 rounded border border-slate-700"
+        >
+          Not Connected
+        </div>
+      </div>
+    </aside>
 
-            <label>License Token ID</label>
-            <input
-              type="number"
-              id="tokenIdInput"
-              class="form-control mb-3"
-              placeholder="e.g. 1"
-              value="1"
-            />
-
-            <button id="connectBtn" class="btn btn-primary w-100 mb-2">
-              1. Connect Wallet
-            </button>
-            <button id="launchBtn" class="btn btn-success w-100" disabled>
-              2. Launch Software
-            </button>
+    <main class="flex-1 flex flex-col relative min-w-0 bg-dark-900">
+      <header
+        class="h-16 border-b border-slate-800 bg-dark-900/80 backdrop-blur-md flex items-center justify-between px-6 z-20 relative shrink-0"
+      >
+        <div class="flex items-center gap-4">
+          <h1 class="text-slate-100 font-semibold text-lg">
+            Zero-Trust Command Center
+          </h1>
+          <div
+            class="flex items-center gap-2 bg-dark-950 px-3 py-1.5 rounded-full border border-slate-800 shadow-inner hidden md:flex"
+          >
+            <div class="w-2 h-2 rounded-full bg-slate-500" id="statusDot"></div>
+            <span
+              id="statusText"
+              class="text-xs font-mono text-slate-400 mt-0.5"
+              >Idle</span
+            >
           </div>
         </div>
 
-        <div class="alert alert-secondary">
-          <strong>Status:</strong> <span id="statusText">Idle</span>
+        <div class="flex items-center gap-3">
+          <input
+            type="number"
+            id="tokenIdInput"
+            class="bg-dark-950 border border-slate-700 text-white text-sm rounded-md px-3 py-1.5 w-24 focus:outline-none focus:border-brand-500"
+            placeholder="SBT ID"
+            value="1"
+          />
+          <button
+            id="connectBtn"
+            class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors"
+          >
+            Connect Wallet
+          </button>
+          <button
+            id="launchBtn"
+            class="bg-brand-600 hover:bg-brand-500 disabled:bg-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-sm font-medium py-1.5 px-4 rounded-md transition-colors shadow-lg shadow-brand-500/20"
+            disabled
+          >
+            Unlock Secure Environment
+          </button>
+        </div>
+      </header>
+
+      <div
+        id="lockOverlay"
+        class="absolute inset-0 top-16 z-10 flex flex-col items-center justify-center bg-dark-900/60 backdrop-blur-md"
+      >
+        <div
+          class="bg-dark-800/90 border border-slate-700 p-8 rounded-2xl shadow-2xl flex flex-col items-center text-center max-w-sm"
+        >
+          <div
+            class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-slate-600 shadow-inner"
+          >
+            <svg
+              class="w-8 h-8 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              ></path>
+            </svg>
+          </div>
+          <h2 class="text-xl font-bold text-white mb-2">Application Locked</h2>
+          <p class="text-sm text-slate-400 mb-6">
+            Cryptographic verification required. Please connect your wallet and
+            provide a valid Soulbound Token ID.
+          </p>
+          <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+            <div
+              class="w-1/3 h-full bg-slate-600 animate-pulse rounded-full"
+            ></div>
+          </div>
         </div>
       </div>
 
-      <div class="col-md-8">
-        <div class="card bg-dark text-light mb-4">
-          <div class="card-header border-secondary">
-            Protected Module (AES-256 Encrypted)
-          </div>
-          <div class="card-body text-center">
-            <div
-              id="protectedContent"
-              class="secret-content p-5 bg-secondary text-white rounded"
+      <div
+        id="softwareContent"
+        class="flex-1 overflow-y-auto p-8 pointer-events-none select-none"
+      >
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div
+            class="bg-dark-800 border border-slate-700 p-5 rounded-xl shadow-sm"
+          >
+            <h3
+              class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2"
             >
-              <h3>TOP SECRET ALGORITHM</h3>
-              <p>If you can read this, the Ephemeral Key was valid.</p>
-              <div id="secretData" style="display: none">
-                DATA: { "core_logic": "RUNNING", "algo_id": "X99" }
-              </div>
+              Network Status
+            </h3>
+            <div class="flex items-end gap-3">
+              <span class="text-3xl font-bold text-white">Secure</span
+              ><span class="text-brand-500 text-sm font-medium mb-1"
+                >Encrypted</span
+              >
+            </div>
+          </div>
+          <div
+            class="bg-dark-800 border border-slate-700 p-5 rounded-xl shadow-sm"
+          >
+            <h3
+              class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2"
+            >
+              Active Nodes
+            </h3>
+            <div class="flex items-end gap-3">
+              <span class="text-3xl font-bold text-white">1,024</span
+              ><span class="text-brand-500 text-sm font-medium mb-1">+12%</span>
+            </div>
+          </div>
+          <div
+            class="bg-dark-800 border border-slate-700 p-5 rounded-xl shadow-sm"
+          >
+            <h3
+              class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2"
+            >
+              Threat Prevention
+            </h3>
+            <div class="flex items-end gap-3">
+              <span class="text-3xl font-bold text-white">Active</span
+              ><span class="text-brand-500 text-sm font-medium mb-1"
+                >Zero Breaches</span
+              >
             </div>
           </div>
         </div>
 
-        <div class="terminal" id="console">
-          <div>_ DIBSL Secure Loader v1.0</div>
-          <div>_ Waiting for authorization...</div>
+        <div
+          class="bg-dark-800 border border-slate-700 rounded-xl shadow-sm overflow-hidden min-h-[400px]"
+        >
+          <div
+            class="border-b border-slate-700 px-6 py-4 flex justify-between items-center"
+          >
+            <h3 class="text-white font-medium">Real-time Telemetry</h3>
+            <span class="flex h-3 w-3 relative">
+              <span
+                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-500 opacity-75"
+              ></span>
+              <span
+                class="relative inline-flex rounded-full h-3 w-3 bg-brand-500"
+              ></span>
+            </span>
+          </div>
+          <div class="p-6">
+            <table class="w-full text-left text-sm text-slate-400">
+              <thead class="text-xs text-slate-500 uppercase bg-dark-900/50">
+                <tr>
+                  <th class="px-4 py-3 rounded-tl-lg">Timestamp</th>
+                  <th class="px-4 py-3">Event Type</th>
+                  <th class="px-4 py-3">Source IP</th>
+                  <th class="px-4 py-3 rounded-tr-lg">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-b border-slate-700/50">
+                  <td class="px-4 py-3 font-mono">14:02:11.002</td>
+                  <td class="px-4 py-3 text-white">Polymorphic Key Gen</td>
+                  <td class="px-4 py-3 font-mono">192.168.1.104</td>
+                  <td class="px-4 py-3 text-brand-500">Success</td>
+                </tr>
+                <tr class="border-b border-slate-700/50">
+                  <td class="px-4 py-3 font-mono">14:02:08.441</td>
+                  <td class="px-4 py-3 text-white">SBT Validation</td>
+                  <td class="px-4 py-3 font-mono">10.0.0.5</td>
+                  <td class="px-4 py-3 text-brand-500">Verified</td>
+                </tr>
+                <tr class="border-b border-slate-700/50">
+                  <td class="px-4 py-3 font-mono">14:01:55.910</td>
+                  <td class="px-4 py-3 text-white">Handshake Init</td>
+                  <td class="px-4 py-3 font-mono">192.168.1.104</td>
+                  <td class="px-4 py-3 text-brand-500">Authorized</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
+
+    <aside
+      class="w-80 bg-[#0a0a0a] border-l border-slate-800 flex flex-col shrink-0 z-30"
+    >
+      <div
+        class="h-16 border-b border-slate-800 flex items-center px-4 bg-dark-950 shrink-0"
+      >
+        <svg
+          class="w-5 h-5 text-slate-500 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          ></path>
+        </svg>
+        <span class="text-sm font-mono text-slate-300">Execution Log</span>
+      </div>
+
+      <div
+        id="console"
+        class="flex-1 p-4 font-mono text-xs overflow-y-auto space-y-2"
+      >
+        <div class="text-slate-500">Init DIBSL Daemon v2.4.1...</div>
+        <div class="text-slate-500">
+          Loading local cryptographic modules... OK
+        </div>
+        <div class="text-cyan-600">> Awaiting wallet connection...</div>
+      </div>
+    </aside>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>

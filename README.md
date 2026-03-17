@@ -4,7 +4,6 @@
 
 **“By the Time You Break It — It’s Already Changed.”**
 
----
 
 ## 📌 Overview
 
@@ -12,7 +11,6 @@ DIBSL (Decentralized Identity-Bound Software Licensing) is a next-generation sof
 
 Unlike traditional DRM systems that rely on static keys, DIBSL introduces a **dynamic, time-variant, and identity-linked execution model**, ensuring that software remains secure even under advanced adversarial conditions.
 
----
 
 ## 🚨 Problem Statement
 
@@ -25,8 +23,6 @@ Unlike traditional DRM systems that rely on static keys, DIBSL introduces a **dy
 > **Core Issue:**
 > Existing systems verify *who you are*, but fail to secure *what you execute*.
 
----
-
 ## 💡 Proposed Solution
 
 DIBSL introduces a **hybrid decentralized architecture** that combines:
@@ -38,7 +34,7 @@ DIBSL introduces a **hybrid decentralized architecture** that combines:
 > **Key Idea:**
 > *Eliminate static keys. Replace them with dynamic, identity-bound execution.*
 
----
+
 
 ## 🧱 Core Architecture
 
